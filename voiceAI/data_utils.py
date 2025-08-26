@@ -28,8 +28,7 @@ class Preparedata:
 
     def build_vocab(self):
         for intent in self.file['conversation']:
-            # ❌ wrong: self.inputVocab.extend(intent['prompt'])
-            # ✅ fix: tokenize into words instead of characters
+          
             self.inputVocab.extend(word_tokenize(intent['prompt'].lower()))
             self.outputVocab.extend(word_tokenize(intent['completion'].lower()))
 
@@ -82,7 +81,7 @@ inputs,outputs=word_class.build_dataset()
 tensor_input=torch.tensor(inputs,dtype=torch.long)
 tensor_output=torch.tensor(outputs,dtype=torch.long)
 
-print("Input tensor shape:",tensor_input.shape)
-print("Output tensor shape:",tensor_output.shape)
-print("First input:",tensor_input[0])
-print("First output:",tensor_output[0])
+# print("Input tensor shape:",tensor_input.shape)
+# print("Output tensor shape:",tensor_output.shape)
+# print("First input:",tensor_input[0])
+# print("First output:",tensor_output[0])

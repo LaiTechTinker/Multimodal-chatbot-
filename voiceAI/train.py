@@ -17,13 +17,14 @@ tensor_output = torch.tensor(outputs[:5070], dtype=torch.long)
 
 dataset = TensorDataset(tensor_input, tensor_output)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+dataloader = DataLoader(dataset, batch_size=12, shuffle=True)
 
 len_input = len(word_class.word_in_index)
 len_output = len(word_class.word_out_index)
 
-print(tensor_input[0:10])
-print(tensor_input.shape)
-print(tensor_output.shape)
+# print(tensor_input[0:10])
+# print(tensor_input.shape)
+# print(tensor_output.shape)
 
 class VoiceModel(nn.Module):
     def __init__(self, input_vocab, output_vocab, hidden, num_layer, num_embedd):
@@ -44,26 +45,36 @@ class VoiceModel(nn.Module):
 
         self.Linear = nn.Linear(self.hidden, self.len_output)
 
-    def forward(self, input, target, teacher_forcing_ratio=0.5):
-        batch_size, target_len = target.shape
-        outputs = torch.zeros(batch_size, target_len, self.len_output).to(device)
+    def forward(self, input, output, teacher_forcing_ratio=0.5):
+     batch_size, trg_len = output.shape  # trg_len = target sequence length
 
-        # Encode input
-        input_embedded = self.input_embedding(input)
-        _, (hidden, cell) = self.encoder(input_embedded)
+    # ---- Encoder ----
+     input_embding = self.input_embedding(input)
+     _, (hidden_memo, cell_memo) = self.encoder(input_embding)
 
-        # First decoder input = <SOS> (here we use target[:,0])
-        decoder_input = target[:, 0].unsqueeze(1)
+    # ---- Prepare prediction tensor ----
+     prediction = torch.zeros(batch_size, trg_len, self.len_output).to(input.device)
 
-        for t in range(1, target_len):
-            decoder_embedded = self.output_embedding(decoder_input)
-            decoder_output, (hidden, cell) = self.decoder(decoder_embedded, (hidden, cell))
-            prediction = self.Linear(decoder_output.squeeze(1))
-            outputs[:, t] = prediction
+    # ---- First decoder input is <SOS> ----
+     input_token = output[:, 0].unsqueeze(1)  # (batch, 1)
 
-            # Teacher forcing
-            teacher_force = torch.rand(1).item() < teacher_forcing_ratio
-            top1 = prediction.argmax(1).unsqueeze(1)
-            decoder_input = target[:, t].unsqueeze(1) if teacher_force else top1
+    # ---- Loop through target length ----
+     for t in range(1, trg_len):
+        outembedding = self.output_embedding(input_token)
+        out_out, (hidden_memo, cell_memo) = self.decoder(outembedding, (hidden_memo, cell_memo))
+        linear_out = self.Linear(out_out.squeeze(1))  # (batch, vocab_size)
 
-        return outputs
+        # Save prediction
+        prediction[:, t, :] = linear_out
+
+        # Decide teacher forcing
+        teacher_force = torch.rand(1).item() < teacher_forcing_ratio
+        top1 = linear_out.argmax(1).unsqueeze(1)
+
+        input_token = output[:, t].unsqueeze(1) if teacher_force else top1
+
+     return prediction
+
+
+        
+       
