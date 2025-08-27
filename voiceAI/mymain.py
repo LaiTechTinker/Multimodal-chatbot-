@@ -27,7 +27,7 @@ def command():
         
         r.adjust_for_ambient_noise(source, duration=0.5)
         print("Listening.......", end="", flush=True)
-        r.pause_threshold=1.0
+        r.pause_threshold=3.0
         r.phrase_threshold=0.3
         r.sample_rate = 48000
         r.dynamic_energy_threshold=True
@@ -35,7 +35,7 @@ def command():
         r.non_speaking_duration=0.5
         r.dynamic_energy_adjustment=2
         r.energy_threshold=4000
-        r.phrase_time_limit = 10
+        r.phrase_time_limit = 40
         # print(sr.Microphone.list_microphone_names())
         audio = r.listen(source)
     try:

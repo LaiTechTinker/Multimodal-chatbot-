@@ -75,8 +75,8 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 
-nltk.download("punkt")
-nltk.download("wordnet")
+# nltk.download("punkt")
+# nltk.download("wordnet")
 
 word_mapping = torch.load('word_dict.pth')
 word_in_index = word_mapping['word_in_index']
@@ -124,7 +124,9 @@ def evaluate(input_seq, max_len=30):
 
     decoded_sentence = [index_out_word[idx] for idx in output_ids if idx not in [word_out_index["<PAD>"], word_out_index["<SOS>"]]]
     return decoded_sentence
-while True:
-    user_message = input("Your message: ")
-    response = evaluate(user_message)
-    print('Virtual assistant:', ' '.join(response))
+
+if __name__=="__main__":
+    while True:
+     user_message = input("Your message: ")
+     response = evaluate(user_message)
+     print('Virtual assistant:', ' '.join(response))
