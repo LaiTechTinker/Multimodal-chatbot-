@@ -86,7 +86,7 @@ index_in_word = word_mapping['index_in_word']
 len_input = len(word_in_index)
 len_output = len(word_out_index)
 
-model = VoiceModel(len_input, len_output, 256, 2, 128).to(device)
+model = VoiceModel(len_input, len_output, 256, 1, 128).to(device)
 model.load_state_dict(torch.load('voice_model.pth', map_location=device))
 model.eval()
 lemmatizer = WordNetLemmatizer()
@@ -117,9 +117,9 @@ def evaluate(input_seq, max_len=30):
             decoder_out, (hidden, cell) = model.decoder(decoder_embedded, (hidden, cell))
             logits = model.Linear(decoder_out.squeeze(1))
             top1 = logits.argmax(1).item()
-            output_ids.append(top1)
             if top1 == word_out_index["<EOS>"]:
                 break
+            output_ids.append(top1)
             decoder_input = torch.tensor([[top1]], dtype=torch.long).to(device)
 
     decoded_sentence = [index_out_word[idx] for idx in output_ids if idx not in [word_out_index["<PAD>"], word_out_index["<SOS>"]]]

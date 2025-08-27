@@ -216,10 +216,10 @@ def decode_sequence(seq):
     return " ".join(words)
 
 if __name__ == "__main__":
-    model = VoiceModel(len_input, len_output, 256, 2, 128).to(device)
+    model = VoiceModel(len_input, len_output, 256, 1, 128).to(device)
     criterion = nn.CrossEntropyLoss(ignore_index=word_class.word_out_index["<PAD>"])
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-    epochs = 100
+    epochs = 150
 
     for epoch in range(epochs):
         model.train()
