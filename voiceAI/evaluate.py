@@ -122,8 +122,18 @@ def evaluate(input_seq, max_len=30):
             output_ids.append(top1)
             decoder_input = torch.tensor([[top1]], dtype=torch.long).to(device)
 
-    decoded_sentence = [index_out_word[idx] for idx in output_ids if idx not in [word_out_index["<PAD>"], word_out_index["<SOS>"]]]
+    # 🔑 Clean up the sentence
+    decoded_sentence = [
+        index_out_word[idx] for idx in output_ids
+        if idx in index_out_word and index_out_word[idx] not in ["<EOS>", "<PAD>", "<SOS>"]
+    ]
+
+    # Always return something meaningful
+    if not decoded_sentence:
+        decoded_sentence = ["Sorry,", "I", "did", "not", "understand."]
+
     return decoded_sentence
+
 
 if __name__=="__main__":
     while True:
